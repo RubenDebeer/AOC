@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -10,17 +10,32 @@ import (
 )
 
 func main() {
-	// Get ENV Variables
-
+	// Build the Request
 	request, err := newRequestBuilder().AddURL("1", "2024").Build()
-
 	if err != nil {
 		log.Fatalf("there was an error %v", err)
 	}
 
-	_ = godotenv.Load()
+	//_ = godotenv.Load()
+	if err := godotenv.Load(); err != nil {
+		log.Fatalf("error loading .env file: %v", err)
+	}
+
 	request.Header.Add("Cookie", os.Getenv("AOC_COOKIE_SESSION"))
-	fmt.Print(request)
+
+	// Initialize the Client
+	res, err := http.DefaultClient.Do(request)
+	if err != nil {
+		log.Fatalf("there was an error making the call %v", err)
+	}
+	defer res.Body.Close()
+
+	responseBody, err := io.ReadAll(res.Body)
+	if err != nil {
+		log.Fatalf("there was an error reading the response %v", err)
+	}
+
+	log.Printf("response: %s", responseBody)
 }
 
 type RequestBuilder struct {
@@ -48,7 +63,6 @@ func (rb *RequestBuilder) Build() (*http.Request, error) {
 
 	if err != nil {
 		log.Fatalf("there was an error %v", err)
-		return nil, err
 	}
 
 	rb.request = request
