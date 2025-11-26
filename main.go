@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -9,62 +10,53 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// Refactor this code
+
 func main() {
-	// Build the Request
-	request, err := newRequestBuilder().AddURL("1", "2024").Build()
-	if err != nil {
-		log.Fatalf("there was an error %v", err)
-	}
 
-	//_ = godotenv.Load()
-	if err := godotenv.Load(); err != nil {
-		log.Fatalf("error loading .env file: %v", err)
-	}
+	err := run()
+	fatalIfError(err, "There was a problem running the program:")
 
-	request.Header.Add("Cookie", os.Getenv("AOC_COOKIE_SESSION"))
-
-	// Initialize the Client
-	res, err := http.DefaultClient.Do(request)
-	if err != nil {
-		log.Fatalf("there was an error making the call %v", err)
-	}
-	defer res.Body.Close()
-
-	responseBody, err := io.ReadAll(res.Body)
-	if err != nil {
-		log.Fatalf("there was an error reading the response %v", err)
-	}
-
-	log.Printf("response: %s", responseBody)
 }
 
-type RequestBuilder struct {
-	year    string
-	day     string
-	url     string
-	request *http.Request
-	cookie  string
+func run() error {
+	const cookieName = "AOC_COOKIE_SESSION"
+	godotenv.Load()
+	cookie := os.Getenv(cookieName)
+
+	request, rqerr := buildRequest("2024", "1", "https://adventofcode.com/", cookie)
+	fatalIfError(rqerr, "There was a problem building the request:")
+
+	// Initialize the client and use the request
+	response, rserr := http.DefaultClient.Do(request)
+	fatalIfError(rserr, "There was a problem making the request:")
+	defer response.Body.Close()
+
+	responseData, rerr := io.ReadAll(response.Body)
+	fatalIfError(rerr, "There was a problem reading the response:")
+
+	fmt.Println(string(responseData))
+	return nil
 }
 
-func newRequestBuilder() *RequestBuilder {
-	return &RequestBuilder{}
-}
+// Function that builds the request
+func buildRequest(year, day string, baseURL, cookie string) (*http.Request, error) {
 
-func (rb *RequestBuilder) AddURL(day, year string) *RequestBuilder {
-	rb.day = day
-	rb.year = year
-	rb.url = "https://adventofcode.com/" + year + "/day/" + day + "/input"
-	return rb
-}
+	fullUrl := baseURL + year + "/day/" + day + "/input"
 
-func (rb *RequestBuilder) Build() (*http.Request, error) {
-
-	request, err := http.NewRequest("GET", rb.url, nil)
-
+	request, err := http.NewRequest("GET", fullUrl, nil)
 	if err != nil {
-		log.Fatalf("there was an error %v", err)
+		return nil, err
 	}
 
-	rb.request = request
+	request.Header.Add("Cookie", cookie)
+
 	return request, nil
+}
+
+// Small helper function to log fatal errors
+func fatalIfError(err error, msg string) {
+	if err != nil {
+		log.Fatalf("%s: %v", msg, err)
+	}
 }
