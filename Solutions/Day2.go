@@ -1,52 +1,31 @@
 package Solutions
 
 import (
-	"fmt"
 	"log"
 	"strconv"
 	"strings"
 )
 
-// [Range 1] [Range 2] [Range 3]  ....
-
-// [11-22]   [95-115]  [998-1012] ....
-
-// Process Range
-
-func Day2(data []byte) {
-
-	// // 1)
-	// // Read Data into a DS
-	// // Get all of the RangesConv
-	// // Split Line into a slice of Ranges
+func Day2(data []byte) int {
 
 	input := string(data)
-	line := strings.Split(strings.TrimSpace(input), "\n")
+	line := strings.Split(input, "\n")
 	ranges := strings.Split(line[0], ",")
-	var invalidIds []int
 
+	var invalidList []int
 	for _, r := range ranges {
-
-		problemIds := buildRanges(r)
-		invalidIds = appendProblemIds(problemIds)
-		fmt.Println(invalidIds)
+		invalidList = append(invalidList, getInvalidListFromRange(r)...)
 	}
 
-	// 2)
-	// Iterate through the Range
-	// Identify the Invalid ID's and add it to a list
-}
-
-func appendProblemIds(invalidIds []int) []int {
-	var ids []int
-	for _, value := range invalidIds {
-		ids = append(ids, value)
+	var sum int
+	for _, id := range invalidList {
+		sum += id
 	}
 
-	return ids
+	return sum
 }
 
-func buildRanges(idRanges string) []int {
+func getInvalidListFromRange(idRanges string) []int {
 
 	var rangeVal []int
 	split := strings.Split(idRanges, "-")
@@ -77,7 +56,6 @@ func isValid(id string) bool {
 	length := len(id)
 
 	split := length / 2
-
 	first := id[:split]
 	second := id[split:]
 
