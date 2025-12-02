@@ -1,62 +1,45 @@
 package main
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
-	"io"
-	"log"
-	"net/http"
-	"os"
+	"strings"
 
-	"github.com/joho/godotenv"
+	"github.com/RubenDebeer/AOC/src"
 )
 
 // Refactor this code
-
 func main() {
+	responseData, err := src.Run()
 
-	err := run()
-	fatalIfError(err, "There was a problem running the program:")
-
-}
-
-func run() error {
-	const cookieName = "AOC_COOKIE_SESSION"
-	godotenv.Load()
-	cookie := os.Getenv(cookieName)
-
-	request, rqerr := buildRequest("2024", "1", "https://adventofcode.com/", cookie)
-	fatalIfError(rqerr, "There was a problem building the request:")
-
-	// Initialize the client and use the request
-	response, rserr := http.DefaultClient.Do(request)
-	fatalIfError(rserr, "There was a problem making the request:")
-	defer response.Body.Close()
-
-	responseData, rerr := io.ReadAll(response.Body)
-	fatalIfError(rerr, "There was a problem reading the response:")
-
-	fmt.Println(string(responseData))
-	return nil
-}
-
-// Function that builds the request
-func buildRequest(year, day string, baseURL, cookie string) (*http.Request, error) {
-
-	fullUrl := baseURL + year + "/day/" + day + "/input"
-
-	request, err := http.NewRequest("GET", fullUrl, nil)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
-	request.Header.Add("Cookie", cookie)
-
-	return request, nil
+	Day1(responseData)
 }
 
-// Small helper function to log fatal errors
-func fatalIfError(err error, msg string) {
-	if err != nil {
-		log.Fatalf("%s: %v", msg, err)
+func Day1(inputs []byte) int {
+	//fmt.Println(string(inputs))
+	//fmt.Println("test this " + string(inputs[5]))
+
+	// Parse Input
+	//left := []int{}
+	//right := []int{}
+
+	scanner := bufio.NewScanner(bytes.NewReader(inputs))
+
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+
+		fields := strings.Fields(line)
+		if len(fields) != 2 {
+			panic("Invalid input")
+		}
+
+		fmt.Println("Test The line :" + fields[0])
 	}
+
+	return 0
 }
