@@ -1,6 +1,14 @@
 package Solutions
 
-func Day1([]byte) int {
+import (
+	"fmt"
+	"strings"
+)
 
-	return 0
+func Day1(data []byte) int {
+	input := string(data)
+	lines := strings.Split(strings.TrimSpace(input), "\n")
+
+	fmt.Println(lines)
+	return 2
 }
