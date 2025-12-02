@@ -51,6 +51,7 @@ func getInvalidListFromRange(idRanges string) []int {
 	return rangeVal
 }
 
+// 3859 3859
 func isValid(id string) bool {
 
 	length := len(id)
@@ -60,4 +61,5 @@ func isValid(id string) bool {
 	second := id[split:]
 
 	return first != second
+
 }
